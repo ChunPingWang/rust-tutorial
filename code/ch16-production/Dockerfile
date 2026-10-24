@@ -1,5 +1,5 @@
 # 多階段建置：第一階段編譯，第二階段只放執行檔。
-# 最終映像不含 Rust 工具鏈，約 30MB（distroless）而不是 2GB。
+# 最終映像不含 Rust 工具鏈，實測 50MB（distroless 基底 + 1.4MB 執行檔）而不是 2GB。
 
 # ---------- 階段一：編譯 ----------
 FROM rust:1.90-bookworm AS builder
