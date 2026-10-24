@@ -50,6 +50,21 @@
 | [附錄 C](book/附錄C-延伸學習.md) | 延伸學習 | 下一步往哪走 | |
 
 
+## 延伸路徑：機器學習（交易詐欺偵測）
+
+主線讀完後，有一條沿用同一個帳本資料的機器學習路徑，從矩陣運算做到把模型嵌進第 15 章的 API：
+
+| 章 | 主題 | 場景需求 | 你會學到 |
+|---|---|---|---|
+| [ML-0](book/ml/00-路徑總覽.md) | 總覽 | Rust 在 ML 的位置 | 推論部署、資料管線、生態地圖 |
+| [ML-1](book/ml/01-ndarray-交易特徵矩陣.md) | ndarray | 交易變成特徵矩陣 | 軸運算、廣播、Scaler、時間切分 |
+| [ML-2](book/ml/02-從零實作-異常偵測與邏輯回歸.md) | 從零實作 | 沒標記找異常、有標記學分類 | 異常分數、邏輯回歸、precision/recall/AUC |
+| [ML-3](book/ml/03-linfa-Rust的scikit-learn.md) | linfa | 現成演算法與帳戶分群 | Dataset/Fit/Predict、K-means |
+| [ML-4](book/ml/04-candle-神經網路.md) | candle | 學非線性、存成可部署的檔 | Tensor、MLP、AdamW、safetensors |
+| [ML-5](book/ml/05-部署-模型進API.md) | 部署 | 過帳前即時打分 | 載入權重、training-serving skew、微秒推論 |
+
+程式碼在 `code/ml01-*` 到 `code/ml05-*`。
+
 ## 想查基礎語法？對照表
 
 本書沒有獨立的「基礎語法」章，每個基礎概念都在用到它的場景裡講。想直接找某個基礎主題，看這張表：
@@ -88,6 +103,7 @@ cargo test
 ```
 
 第 8 章以後，程式碼會演進成同一個 `ledger` crate，每章在前一章的基礎上增加功能。
+所有範例都在 Rust 1.99 stable 上編譯並執行過；第 11 章起有測試（`cargo test`），第 14、15 章與 ML 路徑請用 `--release` 執行。
 建議邊讀邊打，不要只複製貼上；Rust 的學習曲線主要來自「和編譯器對話」，
 自己打錯、看編譯器怎麼說、再修好，是最有效的學習方式。
 

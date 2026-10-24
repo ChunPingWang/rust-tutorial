@@ -73,7 +73,12 @@ fn to_tensor_1d(y: &Array1<f64>, dev: &Device) -> Result<Tensor> {
 }
 
 fn to_ndarray_1d(t: &Tensor) -> Result<Array1<f64>> {
-    Ok(Array1::from(t.to_vec1::<f32>()?.into_iter().map(f64::from).collect::<Vec<_>>()))
+    Ok(Array1::from(
+        t.to_vec1::<f32>()?
+            .into_iter()
+            .map(f64::from)
+            .collect::<Vec<_>>(),
+    ))
 }
 
 /// Scaler 的參數要跟模型一起存，推論時才能做同樣的標準化
@@ -104,7 +109,14 @@ fn main() -> Result<()> {
     let n_params: usize = varmap.all_vars().iter().map(|v| v.elem_count()).sum();
     println!("參數量：{n_params}（9×16+16 + 16×8+8 + 8×1+1）");
 
-    let mut opt = AdamW::new(varmap.all_vars(), ParamsAdamW { lr: 5e-3, weight_decay: 1e-4, ..Default::default() })?;
+    let mut opt = AdamW::new(
+        varmap.all_vars(),
+        ParamsAdamW {
+            lr: 5e-3,
+            weight_decay: 1e-4,
+            ..Default::default()
+        },
+    )?;
 
     // ---------- 訓練：mini-batch ----------
     let n = xtr.dim(0)?;
@@ -149,8 +161,15 @@ fn main() -> Result<()> {
         mean: scaler.mean.to_vec(),
         std: scaler.std.to_vec(),
     };
-    std::fs::write(out_dir.join("scaler.json"), serde_json::to_string_pretty(&scaler_file)?)?;
-    println!("已存檔：{}（{} bytes）與 scaler.json", out_dir.join("fraud_mlp.safetensors").display(), std::fs::metadata(out_dir.join("fraud_mlp.safetensors"))?.len());
+    std::fs::write(
+        out_dir.join("scaler.json"),
+        serde_json::to_string_pretty(&scaler_file)?,
+    )?;
+    println!(
+        "已存檔：{}（{} bytes）與 scaler.json",
+        out_dir.join("fraud_mlp.safetensors").display(),
+        std::fs::metadata(out_dir.join("fraud_mlp.safetensors"))?.len()
+    );
 
     // ---------- 載回來驗證：新的 VarMap、同樣的網路結構、load 權重 ----------
     let mut varmap2 = VarMap::new(); // load 需要 &mut
@@ -158,7 +177,9 @@ fn main() -> Result<()> {
     let model2 = Mlp::new(vs2)?; // 先建結構（參數是隨機初始化的）
     varmap2.load(out_dir.join("fraud_mlp.safetensors"))?; // 再用名字對上，覆寫參數
     let proba2 = to_ndarray_1d(&model2.predict_proba(&xte)?)?;
-    let max_diff = (&proba - &proba2).mapv(f64::abs).fold(0.0, |a: f64, b| a.max(*b));
+    let max_diff = (&proba - &proba2)
+        .mapv(f64::abs)
+        .fold(0.0, |a: f64, b| a.max(*b));
     println!("載回來的模型與原模型預測最大差異：{max_diff:.2e}（應為 0）");
 
     // ---------- 單筆推論的延遲：ML-5 的 API 關心這個 ----------
@@ -168,7 +189,10 @@ fn main() -> Result<()> {
     for _ in 0..iters {
         let _ = model2.predict_proba(&one)?;
     }
-    println!("單筆推論平均：{:.1} µs", t.elapsed().as_micros() as f64 / iters as f64);
+    println!(
+        "單筆推論平均：{:.1} µs",
+        t.elapsed().as_micros() as f64 / iters as f64
+    );
 
     Ok(())
 }

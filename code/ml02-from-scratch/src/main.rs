@@ -20,7 +20,12 @@ fn main() {
     let scaler = Scaler::fit(&train.x);
     let xtr = scaler.transform(&train.x);
     let xte = scaler.transform(&test.x);
-    println!("訓練 {} 筆 / 測試 {} 筆，測試集詐欺 {} 筆\n", xtr.nrows(), xte.nrows(), test.y.sum() as usize);
+    println!(
+        "訓練 {} 筆 / 測試 {} 筆，測試集詐欺 {} 筆\n",
+        xtr.nrows(),
+        xte.nrows(),
+        test.y.sum() as usize
+    );
 
     // ========== 第一部分：沒有標記 ==========
     println!("=== 無監督：異常分數（完全不用標記，標記只用來事後評估）===");
@@ -32,7 +37,9 @@ fn main() {
     // 標記前 5% 為異常
     let thr = anomaly::threshold_for_top(&m_scores, 0.05);
     Confusion::from_scores(&test.y, &m_scores, thr).report("Mahalanobis top 5%");
-    println!("→ 沒有任何標記就能抓到大部分詐欺，代價是誤殺不少正常交易。這是冷啟動時的合理起點。\n");
+    println!(
+        "→ 沒有任何標記就能抓到大部分詐欺，代價是誤殺不少正常交易。這是冷啟動時的合理起點。\n"
+    );
 
     // ========== 第二部分：有標記 ==========
     println!("=== 監督：邏輯回歸 ===");
@@ -43,7 +50,9 @@ fn main() {
     let losses = model.fit(&xtr, &train.y);
     println!(
         "損失：epoch 0 = {:.4}，epoch 50 = {:.4}，epoch 最後 = {:.4}（持續下降 = 有在學）",
-        losses[0], losses[50], losses.last().unwrap()
+        losses[0],
+        losses[50],
+        losses.last().unwrap()
     );
 
     let p_test = model.predict_proba(&xte);
@@ -70,7 +79,12 @@ fn main() {
     idx.sort_by(|&a, &b| p_test[b].partial_cmp(&p_test[a]).unwrap());
     for &i in idx.iter().take(5) {
         let tx = &txs[(train.x.nrows() + i) as usize];
-        println!("  p={:.3} 實際={} {:?}", p_test[i], if test.y[i] > 0.5 { "詐欺" } else { "正常" }, tx);
+        println!(
+            "  p={:.3} 實際={} {:?}",
+            p_test[i],
+            if test.y[i] > 0.5 { "詐欺" } else { "正常" },
+            tx
+        );
     }
     println!("\n=== 漏網：實際詐欺但 p < 0.5 的前 3 筆 ===");
     let mut missed = 0;

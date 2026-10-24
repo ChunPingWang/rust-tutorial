@@ -36,7 +36,11 @@ impl Confusion {
 
     pub fn f1(&self) -> f64 {
         let (p, r) = (self.precision(), self.recall());
-        if p + r == 0.0 { 0.0 } else { 2.0 * p * r / (p + r) }
+        if p + r == 0.0 {
+            0.0
+        } else {
+            2.0 * p * r / (p + r)
+        }
     }
 
     pub fn accuracy(&self) -> f64 {
@@ -52,13 +56,21 @@ impl Confusion {
 }
 
 fn safe_div(a: usize, b: usize) -> f64 {
-    if b == 0 { 0.0 } else { a as f64 / b as f64 }
+    if b == 0 {
+        0.0
+    } else {
+        a as f64 / b as f64
+    }
 }
 
 /// ROC AUC：隨機抽一個詐欺與一個正常，模型給詐欺較高分的機率。0.5 = 亂猜，1.0 = 完美。
 /// 不依賴 threshold，適合比較模型。
 pub fn roc_auc(y_true: &Array1<f64>, scores: &Array1<f64>) -> f64 {
-    let mut pairs: Vec<(f64, bool)> = scores.iter().zip(y_true.iter()).map(|(&s, &y)| (s, y >= 0.5)).collect();
+    let mut pairs: Vec<(f64, bool)> = scores
+        .iter()
+        .zip(y_true.iter())
+        .map(|(&s, &y)| (s, y >= 0.5))
+        .collect();
     pairs.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
     // 排名法：AUC = (正例的排名和 - n_pos(n_pos+1)/2) / (n_pos * n_neg)
     let n_pos = pairs.iter().filter(|p| p.1).count() as f64;

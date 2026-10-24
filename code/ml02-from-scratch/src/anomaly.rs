@@ -8,7 +8,10 @@ use ndarray::{Array1, Array2, Axis};
 /// z 分數異常分數：每個特徵標準化後，取平方和的平方根。
 /// 等於假設特徵彼此獨立的 Mahalanobis 距離。
 pub fn zscore_anomaly(x_standardized: &Array2<f64>) -> Array1<f64> {
-    x_standardized.mapv(|v| v * v).sum_axis(Axis(1)).mapv(f64::sqrt)
+    x_standardized
+        .mapv(|v| v * v)
+        .sum_axis(Axis(1))
+        .mapv(f64::sqrt)
 }
 
 /// 真正的 Mahalanobis 距離：考慮特徵之間的相關性。
@@ -43,7 +46,11 @@ fn cholesky(a: &Array2<f64>) -> Array2<f64> {
             for k in 0..j {
                 sum -= l[[i, k]] * l[[j, k]];
             }
-            l[[i, j]] = if i == j { sum.max(1e-12).sqrt() } else { sum / l[[j, j]] };
+            l[[i, j]] = if i == j {
+                sum.max(1e-12).sqrt()
+            } else {
+                sum / l[[j, j]]
+            };
         }
     }
     l

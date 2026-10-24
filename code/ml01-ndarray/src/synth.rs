@@ -82,12 +82,22 @@ pub fn generate(n: usize, seed: u64) -> Vec<LabeledTx> {
         let p = &profiles[acct_idx];
 
         let (kind, amount_yuan, hour) = if is_fraud {
-            let kind = if rng.gen_bool(0.6) { Kind::Withdraw } else { Kind::Transfer };
+            let kind = if rng.gen_bool(0.6) {
+                Kind::Withdraw
+            } else {
+                Kind::Transfer
+            };
             // 金額：典型值的 3~15 倍
-            let base = LogNormal::new(p.log_mean, p.log_sd).unwrap().sample(&mut rng);
+            let base = LogNormal::new(p.log_mean, p.log_sd)
+                .unwrap()
+                .sample(&mut rng);
             let amount = base * rng.gen_range(3.0..15.0);
             // 時段：70% 在深夜
-            let hour = if rng.gen_bool(0.7) { rng.gen_range(0.0..5.0) } else { rng.gen_range(0.0..24.0) };
+            let hour = if rng.gen_bool(0.7) {
+                rng.gen_range(0.0..5.0)
+            } else {
+                rng.gen_range(0.0..24.0)
+            };
             (kind, amount, hour)
         } else {
             let kind = match rng.gen_range(0..10) {
@@ -95,8 +105,13 @@ pub fn generate(n: usize, seed: u64) -> Vec<LabeledTx> {
                 5..=7 => Kind::Withdraw,
                 _ => Kind::Transfer,
             };
-            let amount = LogNormal::new(p.log_mean, p.log_sd).unwrap().sample(&mut rng);
-            let hour = Normal::new(p.peak_hour, 3.0).unwrap().sample(&mut rng).rem_euclid(24.0);
+            let amount = LogNormal::new(p.log_mean, p.log_sd)
+                .unwrap()
+                .sample(&mut rng);
+            let hour = Normal::new(p.peak_hour, 3.0)
+                .unwrap()
+                .sample(&mut rng)
+                .rem_euclid(24.0);
             (kind, amount, hour)
         };
 

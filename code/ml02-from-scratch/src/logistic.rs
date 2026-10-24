@@ -44,7 +44,7 @@ impl LogisticRegression {
             let p = self.predict_proba(x);
             // 加權殘差
             let residual = (&p - y) * &sample_w; // 逐元素乘
-            // 梯度：Xᵀ r / n + L2 w
+                                                 // 梯度：Xᵀ r / n + L2 w
             let grad_w = x.t().dot(&residual) / n + &self.weights * self.l2;
             let grad_b = residual.sum() / n;
             self.weights = &self.weights - &(grad_w * self.learning_rate);

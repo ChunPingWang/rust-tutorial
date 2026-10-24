@@ -11,15 +11,15 @@ use crate::synth::{Kind, LabeledTx};
 
 /// 特徵名稱，順序就是矩陣的欄順序
 pub const FEATURE_NAMES: [&str; 9] = [
-    "log_amount",       // ln(金額)：金額跨好幾個數量級，取對數讓分佈接近常態
-    "amount_vs_acct",   // 這筆金額相對帳戶歷史平均的 z 分數：對「這個人」來說大不大
-    "amount_to_balance",// 金額 / 交易前餘額：是不是在掏空帳戶
-    "hour_sin",         // 時段的圓形編碼：23 點和 0 點應該很近
+    "log_amount",        // ln(金額)：金額跨好幾個數量級，取對數讓分佈接近常態
+    "amount_vs_acct",    // 這筆金額相對帳戶歷史平均的 z 分數：對「這個人」來說大不大
+    "amount_to_balance", // 金額 / 交易前餘額：是不是在掏空帳戶
+    "hour_sin",          // 時段的圓形編碼：23 點和 0 點應該很近
     "hour_cos",
-    "is_night",         // 0~5 點
+    "is_night", // 0~5 點
     "is_withdraw",
     "is_transfer",
-    "velocity_24h",     // 同帳戶過去 24 小時內的交易筆數：短時間連續交易
+    "velocity_24h", // 同帳戶過去 24 小時內的交易筆數：短時間連續交易
 ];
 
 pub struct Features {
@@ -41,7 +41,9 @@ impl Scaler {
     /// 每一欄的平均與標準差
     pub fn fit(x: &Array2<f64>) -> Scaler {
         let mean = x.mean_axis(Axis(0)).expect("至少要有一列");
-        let std = x.std_axis(Axis(0), 0.0).mapv(|s| if s < 1e-12 { 1.0 } else { s }); // 常數欄避免除以 0
+        let std = x
+            .std_axis(Axis(0), 0.0)
+            .mapv(|s| if s < 1e-12 { 1.0 } else { s }); // 常數欄避免除以 0
         Scaler { mean, std }
     }
 
@@ -72,12 +74,16 @@ pub fn build(txs: &[LabeledTx]) -> Features {
 
         let amount_vs_acct = if amounts.len() >= 3 {
             let mean = amounts.iter().sum::<f64>() / amounts.len() as f64;
-            let var = amounts.iter().map(|a| (a - mean).powi(2)).sum::<f64>() / amounts.len() as f64;
+            let var =
+                amounts.iter().map(|a| (a - mean).powi(2)).sum::<f64>() / amounts.len() as f64;
             (log_amount - mean) / var.sqrt().max(0.1)
         } else {
             0.0 // 歷史太短，無法判斷
         };
-        let velocity = times.iter().filter(|&&t| tx.minute.saturating_sub(t) <= 24 * 60).count() as f64;
+        let velocity = times
+            .iter()
+            .filter(|&&t| tx.minute.saturating_sub(t) <= 24 * 60)
+            .count() as f64;
 
         let hour_rad = tx.hour as f64 / 24.0 * std::f64::consts::TAU;
         let mut row = x.row_mut(i);
@@ -96,7 +102,11 @@ pub fn build(txs: &[LabeledTx]) -> Features {
         times.push(tx.minute);
     }
 
-    Features { x, y, ids: txs.iter().map(|t| t.id).collect() }
+    Features {
+        x,
+        y,
+        ids: txs.iter().map(|t| t.id).collect(),
+    }
 }
 
 /// 時間順序切分：前 ratio 當訓練、後面當測試。
