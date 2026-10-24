@@ -6,3 +6,6 @@ ledger.json
 .vscode/
 .idea/
 .DS_Store
+
+# proptest 的回歸檔
+**/proptest-regressions/
