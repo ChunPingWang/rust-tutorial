@@ -1,0 +1,16 @@
+[package]
+name = "ledger"
+version = "0.9.0"
+edition = "2021"
+
+[dependencies]
+
+# 一個 package 可以同時有一個 lib 和多個 bin。
+# lib 放核心邏輯（可被測試、被其他 crate 使用），bin 只負責命令列入口。
+[lib]
+name = "ledger"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ledger"
+path = "src/main.rs"

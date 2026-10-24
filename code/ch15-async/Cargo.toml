@@ -1,0 +1,31 @@
+[package]
+name = "ledger"
+version = "0.15.0"
+edition = "2021"
+
+[dependencies]
+# 序列化框架：把結構體變成 JSON/CSV/...，以及反過來。derive 功能讓我們用 #[derive(Serialize)]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# CSV 讀寫，與 serde 整合
+csv = "1"
+# 命令列參數解析，derive 功能讓我們用結構體描述參數
+clap = { version = "4", features = ["derive"] }
+# 自訂錯誤型別的樣板產生器（取代手寫 Display + impl Error）
+thiserror = "2"
+# 應用程式層的錯誤處理（取代 Box<dyn Error>，多了 context）
+anyhow = "1"
+# 日期時間
+chrono = { version = "0.4", features = ["serde"] }
+
+# 非同步執行器。features: rt-multi-thread（多執行緒排程器）、macros（#[tokio::main]）、net、time、sync
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "time", "sync"] }
+# HTTP 框架，建在 tokio + hyper 之上
+axum = "0.8"
+# 結構化日誌
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+# 只在測試時需要的套件
+tempfile = "3"

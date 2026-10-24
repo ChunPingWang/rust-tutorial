@@ -1,0 +1,8 @@
+# Rust 建置產物（每個章節專案各自有 target/）
+**/target/
+# 第 12 章 CLI 預設輸出
+ledger.json
+# 編輯器
+.vscode/
+.idea/
+.DS_Store
