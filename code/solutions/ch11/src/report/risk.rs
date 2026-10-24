@@ -34,8 +34,14 @@ mod tests {
             l.open(id, "x", Money::from_yuan(1_000_000)).unwrap();
         }
         for (i, &a) in accounts.iter().enumerate() {
-            l.apply(Transaction { id: i as u64 + 1, day: 1, kind: TxKind::Withdraw { account: a }, amount: Money::from_cents(1), memo: String::new() })
-                .unwrap();
+            l.apply(Transaction {
+                id: i as u64 + 1,
+                day: 1,
+                kind: TxKind::Withdraw { account: a },
+                amount: Money::from_cents(1),
+                memo: String::new(),
+            })
+            .unwrap();
         }
         l
     }
@@ -43,7 +49,10 @@ mod tests {
     // 練習 1
     #[test]
     fn exactly_three_in_a_row_is_flagged() {
-        assert_eq!(rapid_withdrawals(&ledger_with_withdrawals(&[1, 1, 1])), vec![1]);
+        assert_eq!(
+            rapid_withdrawals(&ledger_with_withdrawals(&[1, 1, 1])),
+            vec![1]
+        );
     }
 
     #[test]
@@ -53,14 +62,31 @@ mod tests {
 
     #[test]
     fn long_streak_is_flagged_once() {
-        assert_eq!(rapid_withdrawals(&ledger_with_withdrawals(&[2, 2, 2, 2, 2, 2])), vec![2]);
+        assert_eq!(
+            rapid_withdrawals(&ledger_with_withdrawals(&[2, 2, 2, 2, 2, 2])),
+            vec![2]
+        );
     }
 
     #[test]
     fn deposits_between_withdrawals_break_the_streak() {
         let mut l = ledger_with_withdrawals(&[1, 1]);
-        l.apply(Transaction { id: 99, day: 1, kind: TxKind::Deposit { account: 1 }, amount: Money::from_cents(1), memo: String::new() }).unwrap();
-        l.apply(Transaction { id: 100, day: 1, kind: TxKind::Withdraw { account: 1 }, amount: Money::from_cents(1), memo: String::new() }).unwrap();
+        l.apply(Transaction {
+            id: 99,
+            day: 1,
+            kind: TxKind::Deposit { account: 1 },
+            amount: Money::from_cents(1),
+            memo: String::new(),
+        })
+        .unwrap();
+        l.apply(Transaction {
+            id: 100,
+            day: 1,
+            kind: TxKind::Withdraw { account: 1 },
+            amount: Money::from_cents(1),
+            memo: String::new(),
+        })
+        .unwrap();
         // 目前的實作只看提款序列，中間的存款不會打斷；這個測試記錄了這個（可能不理想的）行為
         assert_eq!(rapid_withdrawals(&l), vec![1]);
     }

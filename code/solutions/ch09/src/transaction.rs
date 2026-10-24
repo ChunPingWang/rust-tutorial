@@ -72,11 +72,16 @@ impl FromStr for TxKind {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let err = || ParseTxKindError(s.to_string());
         let parts: Vec<&str> = s.split(':').collect();
-        let id = |i: usize| -> Result<u32, ParseTxKindError> { parts.get(i).ok_or_else(err)?.parse().map_err(|_| err()) };
+        let id = |i: usize| -> Result<u32, ParseTxKindError> {
+            parts.get(i).ok_or_else(err)?.parse().map_err(|_| err())
+        };
         match (parts.first().copied(), parts.len()) {
             (Some("D"), 2) => Ok(TxKind::Deposit { account: id(1)? }),
             (Some("W"), 2) => Ok(TxKind::Withdraw { account: id(1)? }),
-            (Some("X"), 3) => Ok(TxKind::Transfer { from: id(1)?, to: id(2)? }),
+            (Some("X"), 3) => Ok(TxKind::Transfer {
+                from: id(1)?,
+                to: id(2)?,
+            }),
             _ => Err(err()),
         }
     }
@@ -88,9 +93,18 @@ mod tests {
 
     #[test]
     fn parses_all_kinds() {
-        assert_eq!("D:1001".parse::<TxKind>().unwrap(), TxKind::Deposit { account: 1001 });
-        assert_eq!("W:7".parse::<TxKind>().unwrap(), TxKind::Withdraw { account: 7 });
-        assert_eq!("X:1:2".parse::<TxKind>().unwrap(), TxKind::Transfer { from: 1, to: 2 });
+        assert_eq!(
+            "D:1001".parse::<TxKind>().unwrap(),
+            TxKind::Deposit { account: 1001 }
+        );
+        assert_eq!(
+            "W:7".parse::<TxKind>().unwrap(),
+            TxKind::Withdraw { account: 7 }
+        );
+        assert_eq!(
+            "X:1:2".parse::<TxKind>().unwrap(),
+            TxKind::Transfer { from: 1, to: 2 }
+        );
     }
 
     #[test]

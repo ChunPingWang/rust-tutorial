@@ -17,7 +17,9 @@ enum TxKind {
 impl TxKind {
     fn affected_accounts(&self) -> Vec<u32> {
         match self {
-            TxKind::Deposit { account } | TxKind::Withdraw { account } | TxKind::Fee { account } => vec![*account],
+            TxKind::Deposit { account }
+            | TxKind::Withdraw { account }
+            | TxKind::Fee { account } => vec![*account],
             TxKind::Transfer { from, to } => vec![*from, *to],
         }
     }
@@ -45,13 +47,24 @@ impl Ledger {
 
     /// 練習 3：方法鏈，不用 match。filter 把「有值但不符合條件」變成 None
     fn rich_balance(&self, id: u32) -> Option<Money> {
-        self.find(id).map(|a| a.balance).filter(|b| *b > Money(1_000_000))
+        self.find(id)
+            .map(|a| a.balance)
+            .filter(|b| *b > Money(1_000_000))
     }
 }
 
 fn main() {
     let ledger = Ledger {
-        accounts: vec![Account { id: 1, balance: Money(500) }, Account { id: 2, balance: Money(2_000_000) }],
+        accounts: vec![
+            Account {
+                id: 1,
+                balance: Money(500),
+            },
+            Account {
+                id: 2,
+                balance: Money(2_000_000),
+            },
+        ],
     };
     for k in [
         TxKind::Deposit { account: 1 },
@@ -62,8 +75,16 @@ fn main() {
         println!("{k:?} 影響 {:?}", k.affected_accounts());
     }
     println!("{:?}", ledger.largest_account().map(|a| a.id)); // Some(2)
-    println!("{:?}", Ledger { accounts: vec![] }.largest_account().is_none()); // true
-    println!("{:?} {:?} {:?}", ledger.rich_balance(1), ledger.rich_balance(2), ledger.rich_balance(9));
+    println!(
+        "{:?}",
+        Ledger { accounts: vec![] }.largest_account().is_none()
+    ); // true
+    println!(
+        "{:?} {:?} {:?}",
+        ledger.rich_balance(1),
+        ledger.rich_balance(2),
+        ledger.rich_balance(9)
+    );
     // None, Some(Money(2000000)), None
 }
 
@@ -78,7 +99,18 @@ mod tests {
 
     #[test]
     fn rich_balance_filters() {
-        let l = Ledger { accounts: vec![Account { id: 1, balance: Money(999_999) }, Account { id: 2, balance: Money(1_000_001) }] };
+        let l = Ledger {
+            accounts: vec![
+                Account {
+                    id: 1,
+                    balance: Money(999_999),
+                },
+                Account {
+                    id: 2,
+                    balance: Money(1_000_001),
+                },
+            ],
+        };
         assert_eq!(l.rich_balance(1), None);
         assert_eq!(l.rich_balance(2), Some(Money(1_000_001)));
         assert_eq!(l.rich_balance(3), None);

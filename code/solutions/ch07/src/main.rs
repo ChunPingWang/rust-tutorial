@@ -43,12 +43,20 @@ struct Ledger {
 impl Ledger {
     fn new(accounts: Vec<Account>) -> Self {
         let initial_total = Money(accounts.iter().map(|a| a.balance.0).sum());
-        Self { accounts: accounts.into_iter().map(|a| (a.id, a)).collect(), history: Vec::new(), initial_total }
+        Self {
+            accounts: accounts.into_iter().map(|a| (a.id, a)).collect(),
+            history: Vec::new(),
+            initial_total,
+        }
     }
 
     fn apply(&mut self, tx: Transaction) -> bool {
         let ok = match tx.kind {
-            TxKind::Deposit { account } => self.accounts.get_mut(&account).map(|a| a.balance.0 += tx.amount.0).is_some(),
+            TxKind::Deposit { account } => self
+                .accounts
+                .get_mut(&account)
+                .map(|a| a.balance.0 += tx.amount.0)
+                .is_some(),
             TxKind::Withdraw { account } => match self.accounts.get_mut(&account) {
                 Some(a) if tx.amount <= a.balance => {
                     a.balance.0 -= tx.amount.0;
@@ -56,14 +64,16 @@ impl Ledger {
                 }
                 _ => false,
             },
-            TxKind::Transfer { from, to } if from != to => match self.accounts.get_disjoint_mut([&from, &to]) {
-                [Some(src), Some(dst)] if tx.amount <= src.balance => {
-                    src.balance.0 -= tx.amount.0;
-                    dst.balance.0 += tx.amount.0;
-                    true
+            TxKind::Transfer { from, to } if from != to => {
+                match self.accounts.get_disjoint_mut([&from, &to]) {
+                    [Some(src), Some(dst)] if tx.amount <= src.balance => {
+                        src.balance.0 -= tx.amount.0;
+                        dst.balance.0 += tx.amount.0;
+                        true
+                    }
+                    _ => false,
                 }
-                _ => false,
-            },
+            }
             TxKind::Transfer { .. } => false,
         };
         if ok {
@@ -74,22 +84,45 @@ impl Ledger {
 
     /// 練習 1：與帳戶有關的交易，金額降冪
     fn monthly_statement(&self, account: u32) -> Vec<&Transaction> {
-        let mut v: Vec<&Transaction> = self.history.iter().filter(|t| t.involves(account)).collect();
+        let mut v: Vec<&Transaction> = self
+            .history
+            .iter()
+            .filter(|t| t.involves(account))
+            .collect();
         v.sort_by_key(|t| std::cmp::Reverse(t.amount));
         v
     }
 
     /// 練習 2：總額守恆檢查
     fn balance_check(&self) -> bool {
-        let deposits: i64 = self.history.iter().filter(|t| matches!(t.kind, TxKind::Deposit { .. })).map(|t| t.amount.0).sum();
-        let withdrawals: i64 = self.history.iter().filter(|t| matches!(t.kind, TxKind::Withdraw { .. })).map(|t| t.amount.0).sum();
+        let deposits: i64 = self
+            .history
+            .iter()
+            .filter(|t| matches!(t.kind, TxKind::Deposit { .. }))
+            .map(|t| t.amount.0)
+            .sum();
+        let withdrawals: i64 = self
+            .history
+            .iter()
+            .filter(|t| matches!(t.kind, TxKind::Withdraw { .. }))
+            .map(|t| t.amount.0)
+            .sum();
         let total: i64 = self.accounts.values().map(|a| a.balance.0).sum();
         total == self.initial_total.0 + deposits - withdrawals
     }
 }
 
 fn main() {
-    let mut ledger = Ledger::new(vec![Account { id: 1, balance: Money(10_000) }, Account { id: 2, balance: Money(500) }]);
+    let mut ledger = Ledger::new(vec![
+        Account {
+            id: 1,
+            balance: Money(10_000),
+        },
+        Account {
+            id: 2,
+            balance: Money(500),
+        },
+    ]);
     let txs: Vec<Transaction> = (1..=10u64)
         .map(|i| Transaction {
             id: i,
@@ -131,10 +164,31 @@ mod tests {
 
     #[test]
     fn statement_sorted_desc_and_filtered() {
-        let mut l = Ledger::new(vec![Account { id: 1, balance: Money(1_000) }, Account { id: 2, balance: Money(0) }]);
-        l.apply(Transaction { id: 1, kind: TxKind::Transfer { from: 1, to: 2 }, amount: Money(100) });
-        l.apply(Transaction { id: 2, kind: TxKind::Deposit { account: 1 }, amount: Money(999) });
-        l.apply(Transaction { id: 3, kind: TxKind::Withdraw { account: 2 }, amount: Money(50) });
+        let mut l = Ledger::new(vec![
+            Account {
+                id: 1,
+                balance: Money(1_000),
+            },
+            Account {
+                id: 2,
+                balance: Money(0),
+            },
+        ]);
+        l.apply(Transaction {
+            id: 1,
+            kind: TxKind::Transfer { from: 1, to: 2 },
+            amount: Money(100),
+        });
+        l.apply(Transaction {
+            id: 2,
+            kind: TxKind::Deposit { account: 1 },
+            amount: Money(999),
+        });
+        l.apply(Transaction {
+            id: 3,
+            kind: TxKind::Withdraw { account: 2 },
+            amount: Money(50),
+        });
         let ids: Vec<u64> = l.monthly_statement(2).iter().map(|t| t.id).collect();
         assert_eq!(ids, vec![1, 3]);
         assert!(l.balance_check());

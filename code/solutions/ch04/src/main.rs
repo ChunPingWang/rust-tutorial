@@ -6,7 +6,11 @@ struct Money(i64);
 impl Money {
     fn format(self) -> String {
         let sign = if self.0 < 0 { "-" } else { "" };
-        format!("{sign}{}.{:02} 元", (self.0 / 100).abs(), (self.0 % 100).abs())
+        format!(
+            "{sign}{}.{:02} 元",
+            (self.0 / 100).abs(),
+            (self.0 % 100).abs()
+        )
     }
 }
 
@@ -33,7 +37,14 @@ impl Transaction {
         } else {
             ("提出", Money(-self.amount.0))
         };
-        format!("#{} 帳戶 {} {} {}（{}）", self.id, self.account_id, verb, abs.format(), self.memo)
+        format!(
+            "#{} 帳戶 {} {} {}（{}）",
+            self.id,
+            self.account_id,
+            verb,
+            abs.format(),
+            self.memo
+        )
     }
 }
 
@@ -61,13 +72,27 @@ struct MoneyNamed {
 }
 
 fn main() {
-    let tx = Transaction { id: 1, account_id: 1001, amount: Money(5_000_000), memo: "十月薪資".into() };
-    let tx2 = Transaction { id: 2, account_id: 1001, amount: Money(-300_000), memo: "ATM 提款".into() };
+    let tx = Transaction {
+        id: 1,
+        account_id: 1001,
+        amount: Money(5_000_000),
+        memo: "十月薪資".into(),
+    };
+    let tx2 = Transaction {
+        id: 2,
+        account_id: 1001,
+        amount: Money(-300_000),
+        memo: "ATM 提款".into(),
+    };
     println!("{}", tx.describe());
     println!("{}", tx2.describe());
 
     let ledger = Ledger {
-        accounts: vec![Account { id: 1001, owner: "王小明".into(), balance: Money(100) }],
+        accounts: vec![Account {
+            id: 1001,
+            owner: "王小明".into(),
+            balance: Money(100),
+        }],
         transactions: vec![tx, tx2],
     };
     println!("{:?}", ledger.find_account(1001).map(|a| &a.owner));
@@ -85,13 +110,25 @@ mod tests {
 
     #[test]
     fn describe_uses_direction_words() {
-        let t = Transaction { id: 7, account_id: 1, amount: Money(-250), memo: "x".into() };
+        let t = Transaction {
+            id: 7,
+            account_id: 1,
+            amount: Money(-250),
+            memo: "x".into(),
+        };
         assert_eq!(t.describe(), "#7 帳戶 1 提出 2.50 元（x）");
     }
 
     #[test]
     fn find_account_borrows() {
-        let l = Ledger { accounts: vec![Account { id: 1, owner: "a".into(), balance: Money(0) }], transactions: vec![] };
+        let l = Ledger {
+            accounts: vec![Account {
+                id: 1,
+                owner: "a".into(),
+                balance: Money(0),
+            }],
+            transactions: vec![],
+        };
         assert_eq!(l.find_account(1).map(|a| a.id), Some(1));
         assert!(l.find_account(2).is_none());
     }

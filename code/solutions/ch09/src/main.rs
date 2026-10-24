@@ -1,7 +1,9 @@
 //! 第 9 章命令列入口：示範 trait 的使用。
 
 use ledger::report::{self, CsvReport, JsonReport, ReportFormat, TextReport};
-use ledger::{save_and_verify, InMemoryStorage, Ledger, Money, Storage, TextFileStorage, Transaction, TxKind};
+use ledger::{
+    save_and_verify, InMemoryStorage, Ledger, Money, Storage, TextFileStorage, Transaction, TxKind,
+};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut ledger = Ledger::new();
@@ -78,7 +80,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // 練習 2、3、4
-    println!("\n{} × 3 = {}", Money::from_yuan(100), Money::from_yuan(100) * 3);
+    println!(
+        "\n{} × 3 = {}",
+        Money::from_yuan(100),
+        Money::from_yuan(100) * 3
+    );
     // let nonsense = Money::from_yuan(1) * Money::from_yuan(1); // E0369: cannot multiply `Money` by `Money`
     println!("{:?}", "X:1001:1002".parse::<TxKind>());
     println!("{}", "Q:1".parse::<TxKind>().unwrap_err());

@@ -7,14 +7,25 @@ use ledger::{Ledger, Money, Transaction, TxKind};
 
 fn main() {
     let mut ledger = Ledger::new();
-    ledger.open(1001, "王小明", Money::from_yuan(50_000)).unwrap();
-    ledger.open(1002, "李小華", Money::from_yuan(2_000)).unwrap();
+    ledger
+        .open(1001, "王小明", Money::from_yuan(50_000))
+        .unwrap();
+    ledger
+        .open(1002, "李小華", Money::from_yuan(2_000))
+        .unwrap();
     ledger.apply_all(
         (1..=6u64)
             .map(|i| Transaction {
                 id: i,
                 day: 1,
-                kind: if i % 2 == 0 { TxKind::Deposit { account: 1001 } } else { TxKind::Transfer { from: 1001, to: 1002 } },
+                kind: if i % 2 == 0 {
+                    TxKind::Deposit { account: 1001 }
+                } else {
+                    TxKind::Transfer {
+                        from: 1001,
+                        to: 1002,
+                    }
+                },
                 amount: Money::from_cents(i as i64 * 100),
                 memo: String::new(),
             })

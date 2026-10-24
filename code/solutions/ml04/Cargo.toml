@@ -1,0 +1,23 @@
+[package]
+name = "sol-ml04"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ndarray = "0.16"
+rand = "0.8"
+rand_distr = "0.4"
+# candle：Hugging Face 的深度學習框架。core 是 Tensor 與自動微分，nn 是層、損失、優化器
+candle-core = "0.11"
+candle-nn = "0.11"
+# 存 Scaler 參數用
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+# 練習 5：直接讀寫 safetensors 檔，模擬「別的框架存出來的權重」
+safetensors = "0.8"
+
+# 練習 4：GPU 後端。cargo run --release --features metal（Mac）/ --features cuda（NVIDIA）
+[features]
+metal = ["candle-core/metal", "candle-nn/metal"]
+cuda = ["candle-core/cuda", "candle-nn/cuda"]

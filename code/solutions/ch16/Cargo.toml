@@ -1,0 +1,50 @@
+[package]
+name = "ledger"
+version = "0.16.0"
+edition = "2021"
+
+[dependencies]
+# 序列化框架：把結構體變成 JSON/CSV/...，以及反過來。derive 功能讓我們用 #[derive(Serialize)]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# CSV 讀寫，與 serde 整合
+csv = "1"
+# 命令列參數解析，derive 功能讓我們用結構體描述參數
+clap = { version = "4", features = ["derive"] }
+# 自訂錯誤型別的樣板產生器（取代手寫 Display + impl Error）
+thiserror = "2"
+# 應用程式層的錯誤處理（取代 Box<dyn Error>，多了 context）
+anyhow = "1"
+# 日期時間
+chrono = { version = "0.4", features = ["serde"] }
+
+# 非同步執行器。features: rt-multi-thread（多執行緒排程器）、macros（#[tokio::main]）、net、time、sync
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "time", "sync"] }
+# HTTP 框架，建在 tokio + hyper 之上
+axum = "0.8"
+# 結構化日誌
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# 練習 5：指標
+metrics = "0.24"
+metrics-exporter-prometheus = { version = "0.17", default-features = false }
+
+[dev-dependencies]
+# 只在測試時需要的套件
+tempfile = "3"
+
+# ---------- 第 16 章：建置設定 ----------
+
+# release 設定檔：cargo build --release 時生效
+[profile.release]
+opt-level = 3        # 最高最佳化（預設就是 3）
+lto = "fat"          # 連結時最佳化：跨 crate 內聯，執行檔更小更快，編譯更久
+codegen-units = 1    # 單一程式碼產生單元：更好的最佳化，編譯更慢
+strip = true         # 去掉符號表，執行檔小很多
+panic = "abort"      # panic 時直接中止而不展開堆疊：更小更快；但 catch_unwind 會失效，請確認你不依賴它
+# debug = true       # 需要用 profiler 看 release 的符號時打開
+
+# 開發時讓相依套件也最佳化（我們自己的程式碼仍是 debug）：測試跑得快很多
+[profile.dev.package."*"]
+opt-level = 2

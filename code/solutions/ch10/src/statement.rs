@@ -38,7 +38,11 @@ impl<'a> Statement<'a> {
 
     /// 練習 1：只回傳某種交易。回傳 'a 而不是跟 &self：元素借自帳本，對帳單丟掉後仍可用。
     pub fn filter_kind(&self, label: &str) -> Vec<&'a Transaction> {
-        self.entries.iter().copied().filter(|tx| kind_label(&tx.kind) == label).collect()
+        self.entries
+            .iter()
+            .copied()
+            .filter(|tx| kind_label(&tx.kind) == label)
+            .collect()
     }
 
     /// 金額最大的一筆。回傳型別是 Option<&'a Transaction> 而不是 Option<&Transaction>：

@@ -12,15 +12,19 @@ fn arb_tx() -> impl Strategy<Value = Transaction> {
     let account = prop_oneof![Just(1001u32), Just(1002), Just(1003), Just(9999)];
     let kind = prop_oneof![
         account.clone().prop_map(|a| TxKind::Deposit { account: a }),
-        account.clone().prop_map(|a| TxKind::Withdraw { account: a }),
+        account
+            .clone()
+            .prop_map(|a| TxKind::Withdraw { account: a }),
         (account.clone(), account).prop_map(|(f, t)| TxKind::Transfer { from: f, to: t }),
     ];
-    (any::<u64>(), 1u32..=30, kind, -10_000i64..3_000_000).prop_map(|(id, day, kind, cents)| Transaction {
-        id,
-        day,
-        kind,
-        amount: Money::from_cents(cents),
-        memo: String::new(),
+    (any::<u64>(), 1u32..=30, kind, -10_000i64..3_000_000).prop_map(|(id, day, kind, cents)| {
+        Transaction {
+            id,
+            day,
+            kind,
+            amount: Money::from_cents(cents),
+            memo: String::new(),
+        }
     })
 }
 

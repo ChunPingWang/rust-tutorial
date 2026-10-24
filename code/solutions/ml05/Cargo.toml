@@ -1,0 +1,37 @@
+[package]
+name = "sol-ml05"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+candle-core = "0.11"
+candle-nn = "0.11"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "time", "sync"] }
+axum = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+chrono = "0.4"
+# 只有 bench 子命令用來產生測試交易
+rand = "0.8"
+rand_distr = "0.4"
+# 練習 1：整合進第 15 章的帳本 API（path 相依指向該章的 crate）
+ledger = { path = "../../ch15-async" }
+# 練習 4：指標
+metrics = "0.24"
+metrics-exporter-prometheus = { version = "0.17", default-features = false }
+
+[dev-dependencies]
+# 練習 5
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"
+
+[[bin]]
+name = "sol-ml05"
+path = "src/main.rs"
+
+[[bin]]
+name = "ledger-with-scoring"
+path = "src/bin/ledger_with_scoring.rs"

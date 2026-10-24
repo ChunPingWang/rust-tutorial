@@ -59,9 +59,18 @@ impl ReportFormat for JsonReport {
     fn render(&self, ledger: &Ledger) -> String {
         let items: Vec<String> = ranking(ledger)
             .iter()
-            .map(|(id, owner, bal)| format!("{{\"account_id\":{id},\"owner\":{owner:?},\"balance_cents\":{}}}", bal.cents()))
+            .map(|(id, owner, bal)| {
+                format!(
+                    "{{\"account_id\":{id},\"owner\":{owner:?},\"balance_cents\":{}}}",
+                    bal.cents()
+                )
+            })
             .collect();
-        format!("{{\"total_cents\":{},\"accounts\":[{}]}}\n", ledger.total_balance().cents(), items.join(","))
+        format!(
+            "{{\"total_cents\":{},\"accounts\":[{}]}}\n",
+            ledger.total_balance().cents(),
+            items.join(",")
+        )
     }
 
     fn file_extension(&self) -> &'static str {

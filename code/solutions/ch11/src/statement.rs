@@ -132,7 +132,14 @@ mod tests {
         let mut l = Ledger::new();
         l.open(1, "x", Money::ZERO).unwrap();
         for id in 1..=n {
-            l.apply(Transaction { id, day: 1, kind: TxKind::Deposit { account: 1 }, amount: Money::from_cents(id as i64), memo: String::new() }).unwrap();
+            l.apply(Transaction {
+                id,
+                day: 1,
+                kind: TxKind::Deposit { account: 1 },
+                amount: Money::from_cents(id as i64),
+                memo: String::new(),
+            })
+            .unwrap();
         }
         l
     }
@@ -142,14 +149,20 @@ mod tests {
     fn first_page_is_full() {
         let l = ledger_with_n_deposits(7);
         let s = l.statement(1, 1, 1).unwrap();
-        assert_eq!(s.page(0, 3).iter().map(|t| t.id).collect::<Vec<_>>(), vec![1, 2, 3]);
+        assert_eq!(
+            s.page(0, 3).iter().map(|t| t.id).collect::<Vec<_>>(),
+            vec![1, 2, 3]
+        );
     }
 
     #[test]
     fn last_page_is_partial() {
         let l = ledger_with_n_deposits(7);
         let s = l.statement(1, 1, 1).unwrap();
-        assert_eq!(s.page(2, 3).iter().map(|t| t.id).collect::<Vec<_>>(), vec![7]);
+        assert_eq!(
+            s.page(2, 3).iter().map(|t| t.id).collect::<Vec<_>>(),
+            vec![7]
+        );
     }
 
     #[test]
