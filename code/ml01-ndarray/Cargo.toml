@@ -1,0 +1,10 @@
+[package]
+name = "ml01-ndarray"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# 版本跟著 linfa 0.8（ML-3 會用）走：ndarray 0.16、rand 0.8，避免同一個專案裡出現兩個 ndarray
+ndarray = "0.16"
+rand = "0.8"
+rand_distr = "0.4"
